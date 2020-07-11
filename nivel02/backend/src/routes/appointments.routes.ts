@@ -1,39 +1,30 @@
 import { Router } from 'express';
-import { uuid } from 'uuidv4';
-import { startOfHour, parseISO, isEqual } from 'date-fns';
+import { parseISO } from 'date-fns';
+import { getCustomRepository } from 'typeorm';
+import AppointmentsRepository from '../repositories/AppointmentsRepository';
+import CreateAppointmentService from '../services/CreateAppointmentService';
 
 const appointmentsRouter = Router();
 
-interface Appointment {
-    id: string;
-    provider: string;
-    date: Date;
-}
+appointmentsRouter.get('/', async (request, response) => {
+    const appointmentsRepository = getCustomRepository(AppointmentsRepository);
+    const appointments = await appointmentsRepository.find();
+    return response.json(appointments);
+});
 
-const appointments: Appointment[] = [];
-
-appointmentsRouter.post('/', (request, response) => {
-    const { provider, date } = request.body;
-    const parsedDate = startOfHour(parseISO(date));
-
-    // CÓDIGO ABAIXO RESPONSAVEL POR VERIFICAR SE JÁ EXISTE A DATA PASSADA DENTRO DO ARRAY
-    const findAppointmentInSameDate = appointments.find(appointment =>
-        isEqual(parsedDate, appointment.date),
-    );
-
-    if (findAppointmentInSameDate) {
-        return response
-            .status(400)
-            .json({ message: 'This appointment is already booked' });
+appointmentsRouter.post('/', async (request, response) => {
+    try {
+        const { provider, date } = request.body;
+        const parsedDate = parseISO(date);
+        const createAppointment = new CreateAppointmentService();
+        const appoinment = await createAppointment.execute({
+            provider,
+            date: parsedDate,
+        });
+        return response.json(appoinment);
+    } catch (err) {
+        return response.status(400).json({ Error: err.message });
     }
-
-    const appoinment = {
-        id: uuid(),
-        provider,
-        date: parsedDate,
-    };
-    appointments.push(appoinment);
-    return response.json(appoinment);
 });
 
 export default appointmentsRouter;
