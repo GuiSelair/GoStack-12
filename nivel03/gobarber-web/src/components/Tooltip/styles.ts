@@ -31,7 +31,7 @@ export const Container = styled.div`
     }
   }
 
-  &:hover {
+  &:hover span {
     opacity: 1;
     visibility: visible;
   }
