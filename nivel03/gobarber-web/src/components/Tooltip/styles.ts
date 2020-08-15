@@ -12,9 +12,9 @@ export const Container = styled.div`
     font-weight: 500;
     opacity: 0;
     visibility: hidden;
-    transition: opacity visibility 0.4s;
+    transition: opacity 0.4s;
     position: absolute;
-    bottom: calc(100% + 12);
+    bottom: calc(100% + 12px);
     left: 50%;
     transform: translateX(-50%);
     color: #312e38;
