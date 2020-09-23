@@ -1,0 +1,11 @@
+version: '3.1'
+
+services:
+  gostack:
+    image: postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: 'docker'
+      POSTGRES_USER: 'docker'

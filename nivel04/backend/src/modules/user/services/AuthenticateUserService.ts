@@ -1,52 +1,60 @@
-import { getRepository } from 'typeorm';
 import { compare } from 'bcryptjs';
 import { sign } from 'jsonwebtoken';
+import { inject, injectable } from 'tsyringe';
 
 import User from '@modules/user/infra/typeorm/entities/User';
 import authConfig from '@config/auth';
 import AppError from '@shared/errors/AppError';
+import IUsersRepository from '@modules/user/repositories/IUsersRepository';
 
-interface RequestDTO {
-    email: string;
-    password: string;
+interface IRequestDTO {
+  email: string;
+  password: string;
 }
 
-interface ResponseDTO {
-    user: User;
-    token: string;
+interface IResponseDTO {
+  user: User;
+  token: string;
 }
 
+@injectable()
 class AuthenticateUserService {
-    public async execute({
-        email,
-        password,
-    }: RequestDTO): Promise<ResponseDTO> {
-        const usersRepository = getRepository(User);
-        const user = await usersRepository.findOne({
-            where: { email },
-        });
+  private usersRepository: IUsersRepository;
 
-        if (!user) {
-            throw new AppError('Incorrect email/password combination.', 401);
-        }
+  constructor(
+    @inject('UsersRepository')
+    usersRepository: IUsersRepository,
+  ) {
+    this.usersRepository = usersRepository;
+  }
 
-        const passwordMatched = await compare(password, user.password);
+  public async execute({
+    email,
+    password,
+  }: IRequestDTO): Promise<IResponseDTO> {
+    const user = await this.usersRepository.findByEmail(email);
 
-        if (!passwordMatched) {
-            throw new AppError('Incorrect email/password combination.', 401);
-        }
-        delete user.password;
-
-        const token = sign({}, authConfig.jwt.secret, {
-            subject: user.id,
-            expiresIn: authConfig.jwt.expiresIn,
-        });
-
-        return {
-            user,
-            token,
-        };
+    if (!user) {
+      throw new AppError('Incorrect email/password combination.', 401);
     }
+
+    const passwordMatched = await compare(password, user.password);
+
+    if (!passwordMatched) {
+      throw new AppError('Incorrect email/password combination.', 401);
+    }
+    delete user.password;
+
+    const token = sign({}, authConfig.jwt.secret, {
+      subject: user.id,
+      expiresIn: authConfig.jwt.expiresIn,
+    });
+
+    return {
+      user,
+      token,
+    };
+  }
 }
 
 export default AuthenticateUserService;
