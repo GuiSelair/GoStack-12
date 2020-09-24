@@ -1,3 +1,5 @@
+import 'reflect-metadata';
+
 import { startOfHour } from 'date-fns';
 import { inject, injectable } from 'tsyringe';
 
