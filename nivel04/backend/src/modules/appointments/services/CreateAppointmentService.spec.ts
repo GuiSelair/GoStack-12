@@ -1,3 +1,5 @@
+import 'reflect-metadata';
+
 import CreateAppointmentService from './CreateAppointmentService';
 import FakeAppointmentsRepository from '../repositories/fakes/FakeAppointmentsRepository';
 
