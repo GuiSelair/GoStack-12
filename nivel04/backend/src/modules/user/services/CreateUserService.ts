@@ -1,4 +1,3 @@
-import { hash } from 'bcryptjs';
 import { inject, injectable } from 'tsyringe';
 
 import User from '@modules/user/infra/typeorm/entities/User';
