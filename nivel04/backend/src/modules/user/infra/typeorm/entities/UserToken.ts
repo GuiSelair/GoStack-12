@@ -13,8 +13,11 @@ class UserToken {
   id: string;
 
   @Column()
-  @Generated('uuid')
   user_id: string;
+
+  @Column()
+  @Generated('uuid')
+  token: string;
 
   @CreateDateColumn()
   created_at: Date;
