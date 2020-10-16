@@ -12,7 +12,7 @@ import '@shared/container';
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use('/files', express.static(configUpload.directory));
+app.use('/files', express.static(configUpload.tmpFolder));
 app.use(routes);
 
 app.use((err: Error, request: Request, response: Response, _: NextFunction) => {
