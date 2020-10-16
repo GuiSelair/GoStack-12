@@ -2,7 +2,6 @@ import { uuid } from 'uuidv4';
 
 import IUserTokenRepository from '@modules/user/repositories/IUserTokenRepository';
 import UserToken from '@modules/user/infra/typeorm/entities/UserToken';
-import AppError from '@shared/errors/AppError';
 
 class FakeUserTokensRepository implements IUserTokenRepository {
   private usersToken: UserToken[] = [];
@@ -14,6 +13,8 @@ class FakeUserTokensRepository implements IUserTokenRepository {
       id: uuid(),
       token: uuid(),
       user_id,
+      created_at: new Date(),
+      updated_at: new Date(),
     });
 
     this.usersToken.push(userToken);
