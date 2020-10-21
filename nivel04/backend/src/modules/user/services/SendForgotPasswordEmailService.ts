@@ -25,7 +25,7 @@ class SendForgotPasswordEmailService {
     @inject('MailProvider')
     mailProvider: IMailProvider,
 
-    @inject('UserTokens')
+    @inject('UserTokensRepository')
     userTokensRepository: IUserTokenRepository,
   ) {
     this.usersRepository = usersRepository;
@@ -39,8 +39,8 @@ class SendForgotPasswordEmailService {
     if (!user)
       throw new AppError('Impossible to recover password of unRegisted user');
 
-    this.usersTokenRepository.generate(user.id);
-    this.mailProvider.sendMail(user.email, 'TESTE DE ENVIO');
+    await this.usersTokenRepository.generate(user.id);
+    await this.mailProvider.sendMail(user.email, 'TESTE DE ENVIO');
   }
 }
 

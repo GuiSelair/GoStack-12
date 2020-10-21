@@ -1,18 +1,16 @@
 import { Request, Response } from 'express';
 import { container } from 'tsyringe';
 
-import SendForgotPasswordEmailService from '@modules/user/services/SendForgotPasswordEmailService';
+import ResetPasswordService from '@modules/user/services/ResetPasswordService';
 
-export default class ForgotPasswordController {
+export default class ResetPasswordController {
   public async create(request: Request, response: Response): Promise<Response> {
-    const { email } = request.body;
+    const { password, token } = request.body;
 
-    const sendForgotPasswordEmail = container.resolve(
-      SendForgotPasswordEmailService,
-    );
+    const sendForgotPasswordEmail = container.resolve(ResetPasswordService);
 
-    await sendForgotPasswordEmail.execute({ email });
+    await sendForgotPasswordEmail.execute({ password, token });
 
-    return response.status(204);
+    return response.status(204).json();
   }
 }
