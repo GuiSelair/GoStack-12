@@ -1,4 +1,5 @@
 import { inject, injectable } from 'tsyringe';
+import path from 'path';
 
 // import AppError from '@shared/errors/AppError';
 import IUsersRepository from '@modules/user/repositories/IUsersRepository';
@@ -39,8 +40,29 @@ class SendForgotPasswordEmailService {
     if (!user)
       throw new AppError('Impossible to recover password of unRegisted user');
 
-    await this.usersTokenRepository.generate(user.id);
-    await this.mailProvider.sendMail(user.email, 'TESTE DE ENVIO');
+    const { token } = await this.usersTokenRepository.generate(user.id);
+
+    const forgotPasswordTemplate = path.resolve(
+      __dirname,
+      '..',
+      'views',
+      'forgot_password.hbs',
+    );
+
+    await this.mailProvider.sendMail({
+      to: {
+        email: user.email,
+        name: user.name,
+      },
+      subject: '[GoBarber] Recuperação de Senha',
+      templateData: {
+        file: forgotPasswordTemplate,
+        variables: {
+          name: user.name,
+          link: `http://localhost:3000/reset_password?token=${token}`,
+        },
+      },
+    });
   }
 }
 
