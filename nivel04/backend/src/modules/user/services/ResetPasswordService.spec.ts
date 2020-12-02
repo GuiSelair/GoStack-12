@@ -39,6 +39,7 @@ describe('ResetPassword', () => {
 
     await resetPasswordService.execute({
       password: '123123',
+      password_confirmation: '123123',
       token,
     });
 
@@ -53,6 +54,7 @@ describe('ResetPassword', () => {
       resetPasswordService.execute({
         password: '123456',
         token: 'non-existing-token',
+        password_confirmation: '123123',
       }),
     ).rejects.toBeInstanceOf(AppError);
   });
@@ -66,6 +68,7 @@ describe('ResetPassword', () => {
       resetPasswordService.execute({
         password: '123456',
         token: userToken.token,
+        password_confirmation: '123123',
       }),
     ).rejects.toBeInstanceOf(AppError);
   });
@@ -87,6 +90,26 @@ describe('ResetPassword', () => {
     await expect(
       resetPasswordService.execute({
         password: '123456',
+        password_confirmation: '123123',
+
+        token,
+      }),
+    ).rejects.toBeInstanceOf(AppError);
+  });
+
+  it('should not be able to reset the password if the passwords are not the same', async () => {
+    const user = await fakeUsersRepository.create({
+      name: 'Jonh Doe',
+      email: 'jonhDoe@example.com',
+      password: '123456',
+    });
+
+    const { token } = await fakeUserTokensRepository.generate(user.id);
+
+    await expect(
+      resetPasswordService.execute({
+        password: '123456',
+        password_confirmation: '123123',
         token,
       }),
     ).rejects.toBeInstanceOf(AppError);

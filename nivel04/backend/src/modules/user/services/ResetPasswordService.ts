@@ -10,6 +10,7 @@ import AppError from '@shared/errors/AppError';
 interface IRequestDTO {
   token: string;
   password: string;
+  password_confirmation: string;
 }
 
 @injectable()
@@ -35,7 +36,11 @@ class ResetPasswordService {
     this.hashProvider = hashProvider;
   }
 
-  public async execute({ password, token }: IRequestDTO): Promise<void> {
+  public async execute({
+    password,
+    password_confirmation,
+    token,
+  }: IRequestDTO): Promise<void> {
     const userToken = await this.usersTokenRepository.findByToken(token);
 
     if (!userToken) throw new AppError('User token does not exist');
@@ -49,6 +54,10 @@ class ResetPasswordService {
 
     if (isAfter(Date.now(), compareDate)) {
       throw new AppError('Token Expired.');
+    }
+
+    if (password !== password_confirmation) {
+      throw new AppError('Passwords have been equals.');
     }
 
     user.password = await this.hashProvider.generateHash(password);
