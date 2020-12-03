@@ -1,5 +1,9 @@
 node_modules/
 *lock*
 tmp/*
+.env/
+build/
+coverage
+ormconfig.json
 
 !tmp/.gitkeep
