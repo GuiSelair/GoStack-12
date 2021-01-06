@@ -47,6 +47,9 @@ class CreateAppointmentService {
       throw new AppError('You cant create a appointment on a past date');
     }
 
+    if (date.getDay() === 0 || date.getDay() === 6)
+      throw new AppError('You cant create appointment in the weekend');
+
     if (provider_id === user_id)
       throw new AppError('You cant create a appointment with yourself');
 
