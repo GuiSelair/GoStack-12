@@ -2,9 +2,10 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FiClock, FiPower } from 'react-icons/fi';
 import DayPicker, { DayModifiers } from 'react-day-picker';
 import 'react-day-picker/lib/style.css';
-import { isToday, format, parseISO } from 'date-fns';
+import { isToday, format, parseISO, isAfter } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/auth';
 import logoImg from '../../assets/logo.svg';
 
@@ -30,6 +31,7 @@ interface MonthAvailabilityItem {
 interface AppointmentsItem {
   id: string;
   date: string;
+  hourFormatted?: string;
   user: {
     name: string;
     avatar_url: string;
@@ -46,7 +48,7 @@ const Dashboard: React.FC = () => {
   const { signOut, user } = useAuth();
 
   const handleDateChange = useCallback((day: Date, modifiers: DayModifiers) => {
-    if (modifiers.available) {
+    if (modifiers.available && !modifiers.disabled) {
       setSelectedDate(day);
     }
   }, []);
@@ -70,7 +72,7 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     api
-      .get(`/appointments/me/`, {
+      .get<AppointmentsItem[]>(`/appointments/me/`, {
         params: {
           year: selectedDate.getFullYear(),
           month: selectedDate.getMonth() + 1,
@@ -78,7 +80,14 @@ const Dashboard: React.FC = () => {
         },
       })
       .then(response => {
-        setAppointments(response.data);
+        const appointmentsFormatted = response.data.map(appointment => {
+          return {
+            ...appointment,
+            hourFormatted: format(parseISO(appointment.date), 'HH:mm'),
+          };
+        });
+
+        setAppointments(appointmentsFormatted);
       });
   }, [selectedDate, user.id]);
 
@@ -117,6 +126,12 @@ const Dashboard: React.FC = () => {
     );
   }, [appointments]);
 
+  const nextAppointment = useMemo(() => {
+    return appointments.find(appoinment =>
+      isAfter(parseISO(appoinment.date), new Date()),
+    );
+  }, [appointments]);
+
   return (
     <Container>
       <Header>
@@ -135,7 +150,7 @@ const Dashboard: React.FC = () => {
 
             <div>
               <span>Bem-vindo, </span>
-              <strong>{user.name}</strong>
+              <Link to="/profile">{user.name}</Link>
             </div>
           </Profile>
 
@@ -148,34 +163,44 @@ const Dashboard: React.FC = () => {
         <Schedule>
           <h1>Horarios agendados</h1>
           <p>
-            {isToday(currentMonth) && <span>Hoje</span>}
+            {isToday(selectedDate) && <span>Hoje</span>}
             <span>{selectedDateAsText}</span>
             <span>{selectedWeekDay}</span>
           </p>
 
-          <NextAppointments>
-            <h3>Atendimento a seguir</h3>
-            <div>
-              <img
-                src="https://www.flaticon.com/svg/static/icons/svg/180/180677.svg"
-                alt="Usuário"
-              />
-              <strong>Guilherme Selair</strong>
-              <span>
-                <FiClock />
-                08:00
-              </span>
-            </div>
-          </NextAppointments>
+          {isToday(selectedDate) && nextAppointment && (
+            <NextAppointments>
+              <h3>Agendamento a seguir</h3>
+              <div>
+                <img
+                  src={
+                    nextAppointment.user.avatar_url
+                      ? nextAppointment.user.avatar_url
+                      : 'https://www.flaticon.com/svg/static/icons/svg/180/180677.svg'
+                  }
+                  alt={nextAppointment.user.name}
+                />
+                <strong>{nextAppointment.user}</strong>
+                <span>
+                  <FiClock />
+                  {nextAppointment.hourFormatted}
+                </span>
+              </div>
+            </NextAppointments>
+          )}
 
           <Session>
             <strong>Manhã</strong>
 
+            {morningAppointments.length === 0 && (
+              <p>Nenhum agendamento para este perido.</p>
+            )}
+
             {morningAppointments.map(appointment => (
-              <Appointment>
+              <Appointment key={appointment.id}>
                 <span>
                   <FiClock />
-                  {/* {appointment.} */}
+                  {appointment.hourFormatted}
                 </span>
                 <div>
                   <img
@@ -186,63 +211,30 @@ const Dashboard: React.FC = () => {
                 </div>
               </Appointment>
             ))}
-
-            <Appointment>
-              <span>
-                <FiClock />
-                08:00
-              </span>
-              <div>
-                <img
-                  src="https://www.flaticon.com/svg/static/icons/svg/180/180677.svg"
-                  alt="Usuário"
-                />
-                <strong>Guilherme Selair</strong>
-              </div>
-            </Appointment>
-            <Appointment>
-              <span>
-                <FiClock />
-                08:00
-              </span>
-              <div>
-                <img
-                  src="https://www.flaticon.com/svg/static/icons/svg/180/180677.svg"
-                  alt="Usuário"
-                />
-                <strong>Guilherme Selair</strong>
-              </div>
-            </Appointment>
           </Session>
 
           <Session>
             <strong>Tarde</strong>
-            <Appointment>
-              <span>
-                <FiClock />
-                08:00
-              </span>
-              <div>
-                <img
-                  src="https://www.flaticon.com/svg/static/icons/svg/180/180677.svg"
-                  alt="Usuário"
-                />
-                <strong>Guilherme Selair</strong>
-              </div>
-            </Appointment>
-            <Appointment>
-              <span>
-                <FiClock />
-                08:00
-              </span>
-              <div>
-                <img
-                  src="https://www.flaticon.com/svg/static/icons/svg/180/180677.svg"
-                  alt="Usuário"
-                />
-                <strong>Guilherme Selair</strong>
-              </div>
-            </Appointment>
+
+            {afternoonAppointments.length === 0 && (
+              <p>Nenhum agendamento para este perido.</p>
+            )}
+
+            {afternoonAppointments.map(appointment => (
+              <Appointment key={appointment.id}>
+                <span>
+                  <FiClock />
+                  {appointment.hourFormatted}
+                </span>
+                <div>
+                  <img
+                    src={appointment.user.avatar_url}
+                    alt={appointment.user.name}
+                  />
+                  <strong>{appointment.user.name}</strong>
+                </div>
+              </Appointment>
+            ))}
           </Session>
         </Schedule>
         <Calendar>
