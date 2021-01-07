@@ -73,7 +73,7 @@ export const ProfileImage = styled.div`
     border-radius: 50%;
   }
 
-  button {
+  label {
     position: absolute;
     bottom: 0;
     right: 0;
@@ -88,6 +88,11 @@ export const ProfileImage = styled.div`
     align-items: center;
     justify-content: center;
     transition: background-color 0.2;
+    cursor: pointer;
+
+    input {
+      display: none;
+    }
 
     > svg {
       width: 20px;

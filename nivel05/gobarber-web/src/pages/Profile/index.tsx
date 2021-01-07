@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react';
+import React, { ChangeEvent, useCallback, useRef } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { FiArrowLeft, FiMail, FiUser, FiLock, FiCamera } from 'react-icons/fi';
 import { Form } from '@unform/web';
@@ -26,7 +26,32 @@ const Profile: React.FC = () => {
   const formRef = useRef<FormHandles>(null);
   const { addToast } = useToast();
   const history = useHistory();
-  const { user } = useAuth();
+  const { user, updatedUser } = useAuth();
+
+  const handleAvatarChange = useCallback(
+    async (event: ChangeEvent<HTMLInputElement>) => {
+      if (event.target.files) {
+        try {
+          const avatar = new FormData();
+          avatar.append('avatar', event.target.files[0]);
+          const updattedUser = await api.patch('/users/avatar/', avatar);
+          updatedUser(updattedUser.data);
+          addToast({
+            type: 'success',
+            title: 'Avatar atualizado!',
+          });
+        } catch (e) {
+          addToast({
+            title: 'Erro na atualização do avatar',
+            description:
+              'Ocorreu um erro na atualização do avatar, tente novamente.',
+            type: 'error',
+          });
+        }
+      }
+    },
+    [addToast, updatedUser],
+  );
 
   const handleSubmit = useCallback(
     async (data: FormaDataProps) => {
@@ -37,24 +62,55 @@ const Profile: React.FC = () => {
           email: Yup.string()
             .required('Email obrigatório')
             .email('Digite um email válido'),
-          old_password: Yup.string().min(6, 'No minimo 6 digitos'),
-          new_password: Yup.string().min(6, 'No minimo 6 digitos'),
-          confirmation_password: Yup.string().oneOf(
-            [Yup.ref('new_password'), undefined],
-            'Confirmação de senha incorreta...',
-          ),
+          old_password: Yup.string(),
+          password: Yup.string().when('old_password', {
+            is: val => !!val.length,
+            then: Yup.string().required('Campo obrigatório'),
+            otherwise: Yup.string(),
+          }),
+          password_confirmation: Yup.string()
+            .when('old_password', {
+              is: val => !!val.length,
+              then: Yup.string().required('Campo obrigatório'),
+              otherwise: Yup.string(),
+            })
+            .oneOf(
+              [Yup.ref('password'), undefined],
+              'Confirmação de senha incorreta...',
+            ),
         });
         await schema.validate(data, {
           abortEarly: false,
         });
 
-        await api.post('users', data);
+        const {
+          name,
+          email,
+          password,
+          old_password,
+          password_confirmation,
+        } = data;
 
-        history.push('/');
+        const formData = {
+          name,
+          email,
+          ...(old_password
+            ? {
+                old_password,
+                password,
+                password_confirmation,
+              }
+            : {}),
+        };
+
+        const response = await api.put('/profile', formData);
+        updatedUser(response.data);
+
+        history.push('/dashboard');
         addToast({
           type: 'success',
-          title: 'Cadastro realizado!',
-          description: 'Você já pode fazer seu logon no GoBarber!',
+          title: 'Cadastro atualizado!',
+          description: 'Seu cadastro foi atualizado com sucesso!',
         });
       } catch (error) {
         console.log(error);
@@ -64,8 +120,9 @@ const Profile: React.FC = () => {
           return;
         }
         addToast({
-          title: 'Erro na Cadastro',
-          description: 'Ocorreu um erro ao fazer cadastro, tente novamente.',
+          title: 'Erro na atualização de dados',
+          description:
+            'Ocorreu um erro ao fazer a atualização dos dados, tente novamente.',
           type: 'error',
         });
       }
@@ -95,9 +152,15 @@ const Profile: React.FC = () => {
           <ProfileImage>
             <img src={user.avatar_url} alt={user.name} />
 
-            <button type="button">
+            <label htmlFor="avatar">
               <FiCamera />
-            </button>
+              <input
+                type="file"
+                name="avatar"
+                id="avatar"
+                onChange={handleAvatarChange}
+              />
+            </label>
           </ProfileImage>
           <h1>Meu perfil</h1>
 

@@ -17,6 +17,7 @@ interface AuthContextProps {
   user: UserProps;
   signIn(credentials: SignInProps): Promise<void>;
   signOut(): void;
+  updatedUser(user: UserProps): void;
 }
 
 interface SignInProps {
@@ -62,8 +63,21 @@ export const AuthProvider: React.FC = ({ children }) => {
     setData({} as AuthState);
   }, []);
 
+  const updatedUser = useCallback(
+    (user: UserProps) => {
+      localStorage.setItem('@GoBarber:user', JSON.stringify(user));
+      setData({
+        token: data.token,
+        user,
+      });
+    },
+    [setData, data.token],
+  );
+
   return (
-    <AuthContext.Provider value={{ user: data.user, signIn, signOut }}>
+    <AuthContext.Provider
+      value={{ user: data.user, signIn, signOut, updatedUser }}
+    >
       {children}
     </AuthContext.Provider>
   );
