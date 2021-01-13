@@ -27,6 +27,10 @@ class ListProvidersService {
       `provider-list:${user_id}`,
     );
 
+    if (process.env.DISABLING_CACHE === 'true') {
+      users = null;
+    }
+
     if (!users) {
       users = await this.usersRepository.findAllProviders({
         except_user_id: user_id,
