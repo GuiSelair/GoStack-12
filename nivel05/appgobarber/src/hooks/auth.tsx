@@ -17,7 +17,8 @@ interface UserProps {
   id: string;
   name: string;
   email: string;
-  avatar: string;
+  // eslint-disable-next-line camelcase
+  avatar_url: string;
 }
 
 interface AuthContextProps {
@@ -63,6 +64,7 @@ export const AuthProvider: React.FC = ({ children }) => {
       email,
       password,
     });
+
     const { token, user } = response.data;
 
     await AsyncStorage.multiSet([
