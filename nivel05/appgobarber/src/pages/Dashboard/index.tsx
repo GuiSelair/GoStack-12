@@ -1,7 +1,9 @@
 import { useNavigation } from '@react-navigation/native';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import Icon from 'react-native-vector-icons/Feather';
 
 import { useAuth } from '../../hooks/auth';
+import api from '../../services/api';
 
 import {
   Container,
@@ -10,14 +12,31 @@ import {
   UserName,
   ProfileButton,
   UserAvatar,
+  ProvidersList,
+  ProviderContainer,
+  ProviderAvatar,
+  ProviderInfo,
+  ProviderName,
+  ProviderMeta,
+  ProviderMetaText,
 } from './styles';
 
+export interface IProvider {
+  id: string;
+  name: string;
+  // eslint-disable-next-line camelcase
+  avatar_url: string;
+}
+
 const Dashboard: React.FC = () => {
-  const { user } = useAuth();
+  const [providers, setProviders] = useState<IProvider[]>([]);
+  const { user, signOut } = useAuth();
   const { navigate } = useNavigation();
 
   useEffect(() => {
-    console.log(user);
+    api.get('providers').then(response => {
+      setProviders(response.data);
+    });
   }, [user]);
 
   const navigateToProfile = useCallback(() => {
@@ -36,6 +55,27 @@ const Dashboard: React.FC = () => {
           <UserAvatar source={{ uri: user.avatar_url }} />
         </ProfileButton>
       </Header>
+      <ProvidersList
+        data={providers}
+        // ListHeaderComponent
+        renderItem={({ item: provider }) => (
+          <ProviderContainer>
+            <ProviderAvatar source={{ uri: provider.avatar_url }} />
+            <ProviderInfo>
+              <ProviderName>{provider.name}</ProviderName>
+              <ProviderMeta>
+                <Icon name="calendar" size={14} color="#ff9000" />
+                <ProviderMetaText>Segunda à sexta</ProviderMetaText>
+              </ProviderMeta>
+              <ProviderMeta>
+                <Icon name="clock" size={14} color="#ff9000" />
+                <ProviderMetaText>8h as 18h</ProviderMetaText>
+              </ProviderMeta>
+            </ProviderInfo>
+          </ProviderContainer>
+        )}
+        keyExtractor={provider => provider.id}
+      />
     </Container>
   );
 };
