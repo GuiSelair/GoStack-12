@@ -13,6 +13,7 @@ import {
   ProfileButton,
   UserAvatar,
   ProvidersList,
+  ProvidersListTitle,
   ProviderContainer,
   ProviderAvatar,
   ProviderInfo,
@@ -24,7 +25,6 @@ import {
 export interface IProvider {
   id: string;
   name: string;
-  // eslint-disable-next-line camelcase
   avatar_url: string;
 }
 
@@ -40,8 +40,16 @@ const Dashboard: React.FC = () => {
   }, [user]);
 
   const navigateToProfile = useCallback(() => {
-    navigate('Profile');
-  }, [navigate]);
+    // navigate('Profile');
+    signOut();
+  }, [signOut]);
+
+  const navigateToCreateAppointment = useCallback(
+    (providerId: string) => {
+      navigate('CreateAppoinment', { providerId });
+    },
+    [navigate],
+  );
 
   return (
     <Container>
@@ -57,9 +65,13 @@ const Dashboard: React.FC = () => {
       </Header>
       <ProvidersList
         data={providers}
-        // ListHeaderComponent
+        ListHeaderComponent={
+          <ProvidersListTitle>Cabeleireiros</ProvidersListTitle>
+        }
         renderItem={({ item: provider }) => (
-          <ProviderContainer>
+          <ProviderContainer
+            onPress={() => navigateToCreateAppointment(provider.id)}
+          >
             <ProviderAvatar source={{ uri: provider.avatar_url }} />
             <ProviderInfo>
               <ProviderName>{provider.name}</ProviderName>

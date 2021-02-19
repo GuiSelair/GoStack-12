@@ -42,6 +42,13 @@ export const ProvidersList = styled(FlatList as new () => FlatList<IProvider>)`
   padding: 32px 24px 16px;
 `;
 
+export const ProvidersListTitle = styled.Text`
+  font-size: 24px;
+  margin-bottom: 24px;
+  color: #f4ede8;
+  font-family: 'RobotoSlab-Medium';
+`;
+
 export const ProviderContainer = styled(RectButton)`
   background: #3e3b47;
   padding: 20px;
