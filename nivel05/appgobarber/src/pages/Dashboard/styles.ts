@@ -16,7 +16,7 @@ export const Header = styled.View`
   justify-content: space-between;
   align-items: center;
 
-  padding-top: ${getStatusBarHeight() + 16}px;
+  padding-top: ${getStatusBarHeight() + 24}px;
 `;
 export const HeaderTitle = styled.Text`
   color: #f4ede8;
