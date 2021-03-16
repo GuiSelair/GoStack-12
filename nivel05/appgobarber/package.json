@@ -22,6 +22,7 @@
     "react": "16.13.1",
     "react-native": "0.63.2",
     "react-native-gesture-handler": "^1.7.0",
+    "react-native-image-picker": "^3.2.1",
     "react-native-iphone-x-helper": "^1.2.1",
     "react-native-reanimated": "^1.13.0",
     "react-native-safe-area-context": "^3.1.7",

@@ -5,6 +5,7 @@ import React, {
   useCallback,
   useImperativeHandle,
   forwardRef,
+  ForwardRefRenderFunction,
 } from 'react';
 import { TextInputProps } from 'react-native';
 import { useField } from '@unform/core';
@@ -25,13 +26,13 @@ interface InputRef {
   focus(): void;
 }
 
-const Input: React.RefForwardingComponent<InputRef, InputProps> = (
+const Input: React.ForwardRefRenderFunction<InputRef, InputProps> = (
   { name, icon, containerStyle, ...rest },
   ref,
 ) => {
+  const inputElementRef = useRef<any>(null);
   const { registerField, defaultValue = '', error, fieldName } = useField(name);
   const inputValueRef = useRef<InputValueReference>({ value: defaultValue });
-  const inputElementRef = useRef<any>(null);
   const [isFocused, setIsFocused] = useState(false);
   const [isFilled, setIsFilled] = useState(false);
 
@@ -42,16 +43,20 @@ const Input: React.RefForwardingComponent<InputRef, InputProps> = (
   }));
 
   useEffect(() => {
+    inputValueRef.current.value = defaultValue;
+  }, [defaultValue]);
+
+  useEffect(() => {
     registerField<string>({
       name: fieldName,
       ref: inputValueRef.current,
       path: 'value',
-      setValue(ref: any, value) {
+      setValue(ref: any, value: string) {
         inputValueRef.current.value = value;
         inputElementRef.current.setNativeProps({ text: value });
       },
       clearValue() {
-        inputValueRef.current.value = 'value';
+        inputValueRef.current.value = '';
         inputElementRef.current.clear();
       },
     });

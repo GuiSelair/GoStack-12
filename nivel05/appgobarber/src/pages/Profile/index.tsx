@@ -13,6 +13,7 @@ import { FormHandles } from '@unform/core';
 import { Form } from '@unform/mobile';
 import * as Yup from 'yup';
 import Icon from 'react-native-vector-icons/Feather';
+import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 
 import {
   Container,
@@ -123,6 +124,24 @@ const Profile: React.FC = () => {
     [navigation, updatedUser],
   );
 
+  const handleUpdateAvatar = useCallback(() => {
+    launchImageLibrary(
+      {
+        mediaType: 'photo',
+      },
+      response => {
+        if (response.didCancel) {
+          console.log('Usuário cancelou');
+        } else if (response.errorCode) {
+          console.log(response.errorCode);
+        } else {
+          const source = { uri: response.uri };
+          console.log(source);
+        }
+      },
+    );
+  }, []);
+
   return (
     <>
       <KeyboardAvoidingView
@@ -139,14 +158,14 @@ const Profile: React.FC = () => {
               <Icon name="chevron-left" size={24} color="#999591" />
             </BackButton>
 
-            <UserAvatarButton onPress={navigation.goBack}>
+            <UserAvatarButton onPress={handleUpdateAvatar}>
               <UserAvatar source={{ uri: user.avatar_url }} />
             </UserAvatarButton>
 
             <View>
               <Title>Meu perfil</Title>
             </View>
-            <Form onSubmit={handleSubmit} ref={formRef} initialData={{ user }}>
+            <Form onSubmit={handleSubmit} ref={formRef} initialData={user}>
               <Input
                 name="name"
                 icon="user"
