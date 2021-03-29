@@ -130,8 +130,10 @@ android {
 
     defaultConfig {
         applicationId "com.appgobarber"
-        minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion rootProject.ext.targetSdkVersion
+        minSdkVersion 21
+        // minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion 29
+        // targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
         multiDexEnabled true
