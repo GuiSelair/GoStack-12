@@ -46,8 +46,6 @@ const SignIn: React.FC = () => {
 
         history.push('/dashboard');
       } catch (error) {
-        // eslint-disable-next-line no-console
-        console.log(error);
         if (error instanceof Yup.ValidationError) {
           const errors = validationErrors(error);
           formRef.current?.setErrors(errors);
