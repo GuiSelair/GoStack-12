@@ -13,8 +13,8 @@ Repositório responsável por manter os códigos das aulas do bootcamp. O Bootca
 - [x] Nivel 02
 - [x] Nivel 03
 - [x] Nivel 04
-- [ ] Nivel 05
-- [ ] Nivel 06
+- [x] Nivel 05
+- [x] Nivel 06
 
 ## Referência
  Curso ministrado pela empresa [Rocketseat](https://rocketseat.com.br/) pelo professor [Diego Fernandes](https://github.com/diego3g).
